@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server'; import {prisma} from '@/lib/prisma'; import {verifyPassword,createSession} from '@/lib/auth';
+export async function POST(req:Request){const {email,password}=await req.json();const u=await prisma.user.findUnique({where:{email}});if(!u||!(await verifyPassword(password,u.passwordHash))||!u.isActive)return NextResponse.json({error:'Credenciais inválidas'},{status:401});await createSession({id:u.id,role:u.role,email:u.email});return NextResponse.json({ok:true})}
