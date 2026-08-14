@@ -1,0 +1,3 @@
+import './globals.css'; import type {Metadata} from 'next';
+export const metadata:Metadata={title:'MZ Conecta — Marketing Digital em Moçambique',description:'Conectamos marcas, criadores e clientes.',openGraph:{title:'MZ Conecta',description:'Plataforma moçambicana de marketing digital',type:'website'}};
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="pt"><body>{children}</body></html>}
