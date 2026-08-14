@@ -1,0 +1,6 @@
+import { cookies } from 'next/headers'; import { SignJWT,jwtVerify } from 'jose'; import bcrypt from 'bcryptjs'; import { prisma } from './prisma';
+const secret=new TextEncoder().encode(process.env.AUTH_SECRET||'dev-secret-change-me');
+export async function hashPassword(p:string){return bcrypt.hash(p,12)} export async function verifyPassword(p:string,h:string){return bcrypt.compare(p,h)}
+export async function createSession(user:{id:string,role:string,email:string}){const token=await new SignJWT(user).setProtectedHeader({alg:'HS256'}).setIssuedAt().setExpirationTime('7d').sign(secret); (await cookies()).set('mz_session',token,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',maxAge:60*60*24*7,path:'/'})}
+export async function getSession(){try{const t=(await cookies()).get('mz_session')?.value;if(!t)return null; const {payload}=await jwtVerify(t,secret);return payload as {id:string,role:string,email:string}}catch{return null}}
+export async function requireUser(){const s=await getSession();if(!s)throw new Error('UNAUTHORIZED'); const u=await prisma.user.findUnique({where:{id:s.id},include:{company:true,creator:true}});if(!u||!u.isActive)throw new Error('UNAUTHORIZED');return u}
